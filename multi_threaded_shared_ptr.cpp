@@ -3,43 +3,58 @@
 
 #include "multi_threaded_shared_ptr.h"
 #include <thread>
+#include <cassert>
 
 
 
-struct blocking {
-	void method(int tid) {
-		cout <<tid<< " start running\n";
+struct mutable_object {
+	void method() {
+		mutable_state = 10;
 		std::this_thread::sleep_for(1000ms);
-		cout << tid << " end running\n";
+		assert(mutable_state == 10);
 	}
+
+	void othermethod() {
+		mutable_state = 50;
+		std::this_thread::sleep_for(500ms);
+		assert(mutable_state == 50);
+	}
+
+	int mutable_state = 0;
 };
 
 
 
 int main()
 {
-	blocking* b = new blocking{};
-    locked_ptr<blocking> a = make_locked<blocking>();
-	locked_ptr<blocking> a2;
-	a2 = a;
+	mutable_object* b = new mutable_object{};
+    locked_ptr<mutable_object> a = make_locked<mutable_object>();
+	locked_ptr<mutable_object> a2 = a;
+	a = a;
 	//just for f12 shortcut
 	std::shared_ptr<int> s;
 
 	auto t1 = std::thread([a,s]() {
 		while (true) {
 			cout << "t1 trying to call locking function" << endl;
-			a->method(1);
+			a->method();
 			cout << "t1 released blocking" << endl;
 		}
 		});
 	auto t2 = std::thread([a]() {
 		while (true) {
 			cout << "t2 trying to call locking function" << endl;
-			a->method(2);
+			a->method();
 			cout << "t2 released blocking" << endl;
 		}
 		});
-    std::make_shared<int>(0);
+    
+	while (true) {
+		cout << "main trying to call locking function" << endl;
+		a->othermethod();
+		cout << "main released blocking" << endl;
+	}
+
 	t1.join();
 	t2.join();
 
