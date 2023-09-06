@@ -8,6 +8,7 @@
 
 using namespace std;
 using namespace std::chrono_literals;
+using namespace ext;
 
 struct mutable_object {
 	void method(const std::string& msg) {
@@ -15,6 +16,7 @@ struct mutable_object {
 		mutable_state = 10;
 		std::this_thread::sleep_for(100ms);
 		assert(mutable_state == 10);
+		cout << boolalpha << (mutable_state == 10);
 	}
 
 	void method2(const std::string& msg) {
@@ -22,18 +24,21 @@ struct mutable_object {
 		mutable_state = 20;
 		std::this_thread::sleep_for(100ms);
 		assert(mutable_state == 20);
+		cout << boolalpha << (mutable_state == 20);
 	}
 
 	void method3(const std::string& msg) {
 		std::cout << "method3: " << msg << endl;
 		mutable_state = 50;
+		assert(mutable_state == 50);
 		std::this_thread::sleep_for(100ms);
 		assert(mutable_state == 50);
+		cout << boolalpha << (mutable_state == 50);
 		method(msg);
 		method2(msg);
 	}
 
-	int mutable_state{ 0 };
+	int mutable_state;
 };
 
 
@@ -50,22 +55,24 @@ int main()
 	std::shared_ptr<int> s;
 
 	auto t1 = std::thread([a]() {
-		while (true) {
+		for (int i = 0; i < 50;i++) {
 			a->method("executing in t1");
 			std::this_thread::sleep_for(1000ms);
 		}
 		});
 	auto t2 = std::thread([a]() {
-		while (true) {
+		for (int i = 0; i < 50;i++) {
 			auto a2 = a;
-			a2->method2("executing in t2");
+			a2->method3("executing in t2");
 			std::this_thread::sleep_for(100ms);
 		}
 		});
+
+	auto p2 = a;
     
-	while (true) {
+	for (int i = 0; i < 50; i++) {
 		
-		a->method3("executing in main");
+		p2->method2("executing in main");
 		std::this_thread::sleep_for(500ms);
 	}
 
