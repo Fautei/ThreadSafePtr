@@ -1,11 +1,13 @@
 ﻿// multi_threaded_lock_pointer.cpp: определяет точку входа для приложения.
 //
 
-#include "multi_threaded_shared_ptr.h"
+#include "include/multi_threaded_shared_ptr.hpp"
 #include <thread>
 #include <cassert>
+#include <iostream>
 
-
+using namespace std;
+using namespace std::chrono_literals;
 
 struct mutable_object {
 	void method() {
@@ -31,6 +33,9 @@ int main()
     locked_ptr<mutable_object> a = make_locked<mutable_object>();
 	locked_ptr<mutable_object> a2 = a;
 	a = a;
+	a2.reset(a);
+	a2.reset(a.get());
+	a2.reset();
 	//just for f12 shortcut
 	std::shared_ptr<int> s;
 
