@@ -14,7 +14,7 @@ class locked_ptr {
 public:
 	using weak_type = std::weak_ptr<T>;
 	operator weak_type() = delete;
-
+	using mutex_type = std::mutex;
 	//Add all type of constructors
 	constexpr locked_ptr() noexcept = default;
 	constexpr locked_ptr(nullptr_t) noexcept {}
@@ -30,7 +30,7 @@ public:
 		_decref();
 	}
 
-	locked_ptr& operator=(const locked_ptr& other) noexcept {
+	constexpr locked_ptr& operator=(const locked_ptr& other) noexcept {
 		if (&other != this) {
 			_ptr = other._ptr;
 			_mutex = other._mutex;
@@ -40,36 +40,34 @@ public:
 		return *this;
 	}
 
-	locked_ptr& operator=(locked_ptr&& other) noexcept {
+	constexpr locked_ptr& operator=(locked_ptr&& other) noexcept {
 		if (&other != this) {
 			swap(std::forward<locked_ptr>(other));
 		}
 		return *this;
 	}
 
+	template<typename MtxType>
 	class proxy {
 	public:
-		constexpr proxy(const locked_ptr* ptr) noexcept : _ptr(ptr) {
-			_ptr->_mutex->lock();
-		}
+		constexpr proxy(const locked_ptr* ptr) noexcept : _ptr(ptr), lock(*_ptr->_mutex) {}
 
 		constexpr T* operator->() const noexcept {
 			return _ptr->_ptr;
 		}
 
-		constexpr ~proxy() noexcept {
-			_ptr->_mutex->unlock();
-		}
+		constexpr ~proxy() noexcept {}
 
 	private:
 		const locked_ptr* _ptr;
+		const std::lock_guard<MtxType> lock;
 	};
 
 	template <class Ty, class... Types >
-	friend constexpr  locked_ptr<Ty> make_locked(Types&&... _Args);
+	friend constexpr locked_ptr<Ty> make_locked(Types&&... _Args);
 
-	constexpr proxy operator->() const noexcept {
-		return proxy{ this };
+	constexpr proxy<mutex_type> operator->() const noexcept {
+		return proxy<mutex_type>{ this };
 	}
 
 	constexpr T* get() const noexcept {
@@ -104,7 +102,7 @@ public:
 
 private:
 	std::atomic<size_t>* _use_count{ nullptr };
-	mutable std::mutex* _mutex{ nullptr };
+	mutable mutex_type* _mutex{ nullptr };
 	mutable T* _ptr{ nullptr };
 
 	constexpr void _decref() noexcept {
@@ -123,16 +121,11 @@ private:
 	}
 
 	constexpr void _delete() noexcept {
-		if (_use_count) {
-			delete _use_count;
-		}
-		if (_mutex) {
-			delete _mutex;
-		}
-		if (_ptr) {
-			delete _ptr;
-		}
+		delete _use_count;
+		delete _mutex;
+		delete _ptr;
 	}
+	
 
 	constexpr void _init(T* ptr) {
 		_use_count = new std::atomic<size_t>(1);

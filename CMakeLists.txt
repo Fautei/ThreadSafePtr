@@ -12,7 +12,7 @@ endif()
 project ("multi_threaded_shared_ptr")
 
 # Добавьте источник в исполняемый файл этого проекта.
-add_executable (multi_threaded_shared_ptr "test.cpp" "multi_threaded_shared_ptr.hpp")
+add_executable (multi_threaded_shared_ptr "test.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET multi_threaded_shared_ptr PROPERTY CXX_STANDARD 20)
