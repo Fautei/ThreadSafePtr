@@ -32,6 +32,7 @@ namespace ext {
 
 		constexpr locked_ptr& operator=(const locked_ptr& other) noexcept {
 			if (&other != this) {
+				_decref();
 				_ptr = other._ptr;
 				_mutex = other._mutex;
 				_use_count = other._use_count;
@@ -42,6 +43,7 @@ namespace ext {
 
 		constexpr locked_ptr& operator=(locked_ptr&& other) noexcept {
 			if (&other != this) {
+				_decref();
 				swap(std::forward<locked_ptr>(other));
 			}
 			return *this;
@@ -63,6 +65,8 @@ namespace ext {
 			const std::lock_guard<MtxType> lock;
 		};
 
+
+
 		template <class Ty, class... Types >
 		friend constexpr locked_ptr<Ty> make_locked(Types&&... _Args);
 
@@ -70,11 +74,11 @@ namespace ext {
 			return proxy<mutex_type>{ this };
 		}
 
-		constexpr T* get() const noexcept {
+		constexpr const T* get() const noexcept {
 			return _ptr;
 		}
 
-		constexpr T& operator*() const noexcept {
+		constexpr const T& operator*() const noexcept {
 			return *get();
 		}
 

@@ -38,6 +38,10 @@ struct mutable_object {
 		method2(msg);
 	}
 
+	void const_method(const std::string& msg) const {
+		std::cout << "const method: " << msg << endl;
+	}
+
 	int mutable_state;
 };
 
@@ -45,35 +49,33 @@ struct mutable_object {
 
 int main()
 {
-    locked_ptr<mutable_object> a = make_locked<mutable_object>();
-	locked_ptr<mutable_object> a2 = a;
-	a = a;
-	a2.reset(a);
-	a2.reset(a.get());
-	a2.reset();
+    locked_ptr<mutable_object> a1 = make_locked<mutable_object>();
+
 	//just for f12 shortcut
 	std::shared_ptr<int> s;
 
-	auto t1 = std::thread([a]() {
+	auto t1 = std::thread([a1]() {
 		for (int i = 0; i < 50;i++) {
-			a->method("executing in t1");
+			a1->method("executing in t1");
 			std::this_thread::sleep_for(1000ms);
 		}
 		});
-	auto t2 = std::thread([a]() {
+	auto t2 = std::thread([a1]() {
 		for (int i = 0; i < 50;i++) {
-			auto a2 = a;
+			auto a2 = a1;
 			a2->method3("executing in t2");
+
 			std::this_thread::sleep_for(100ms);
 		}
 		});
 
-	auto p2 = a;
+	auto p2 = a1;
     
 	for (int i = 0; i < 50; i++) {
 		
 		p2->method2("executing in main");
 		std::this_thread::sleep_for(500ms);
+		(*p2).const_method("executing in main");
 	}
 
 	t1.join();
