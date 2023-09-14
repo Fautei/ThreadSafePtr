@@ -82,8 +82,12 @@ namespace ext {
 			return *get();
 		}
 
+		constexpr bool empty() const noexcept {
+			return get() == nullptr;
+		}
+
 		constexpr explicit operator bool() const noexcept {
-			return get() != nullptr;
+			return !empty();
 		}
 
 		constexpr void reset(T* ptr) noexcept {
