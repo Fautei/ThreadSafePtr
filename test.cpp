@@ -1,7 +1,7 @@
 ﻿// multi_threaded_lock_pointer.cpp: определяет точку входа для приложения.
 //
 
-#include "include/multi_threaded_shared_ptr.hpp"
+#include "include/concurrent_ptr.hpp"
 #include <thread>
 #include <cassert>
 #include <iostream>
@@ -49,7 +49,7 @@ struct mutable_object {
 
 int main()
 {
-    locked_ptr<mutable_object> a1 = make_locked<mutable_object>();
+	concurrent_ptr<mutable_object> a1 = make_concurrent<mutable_object>();
 
 	//just for f12 shortcut
 	std::shared_ptr<int> s;
