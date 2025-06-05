@@ -1,21 +1,37 @@
-﻿# CMakeList.txt: проект CMake для multi_threaded_shared_ptr; включите исходный код и определения,
-# укажите здесь логику для конкретного проекта.
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.16)
 
-# Включение горячей перезагрузки для компиляторов MSVC, если поддерживается.
+project(multi_threaded_shared_ptr VERSION 0.1 LANGUAGES CXX)
+
+# Настройка компилятора
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Горячая перезагрузка для MSVC (опционально)
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
+    "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,
+    $<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,
+    $<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("multi_threaded_shared_ptr")
+# Основная библиотека (заголовочная, header-only)
+add_library(mts INTERFACE)
+target_include_directories(mts INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 
-# Добавьте источник в исполняемый файл этого проекта.
-add_executable (multi_threaded_shared_ptr "test.cpp")
-
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET multi_threaded_shared_ptr PROPERTY CXX_STANDARD 20)
+# Примеры
+option(BUILD_EXAMPLES "Build examples" ON)
+if (BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
-# TODO: Добавьте тесты и целевые объекты, если это необходимо.
+# Тесты
+include(CTest)
+option(BUILD_TESTING "Build tests" ON)
+if (BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

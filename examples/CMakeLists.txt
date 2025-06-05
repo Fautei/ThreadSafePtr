@@ -1,0 +1,3 @@
+add_executable(example_thread_safe example_thread_safe_ptr.cpp)
+target_link_libraries(example_thread_safe PRIVATE mts)
+target_compile_features(example_thread_safe PRIVATE cxx_std_20)
