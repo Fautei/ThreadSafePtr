@@ -28,7 +28,7 @@ int main() {
     counter->inc(); // safely increments
     int value = counter->get(); // safely reads
 }
-
+```
 
 🚀 Multithreaded Usage
 
@@ -49,7 +49,7 @@ for (int i = 0; i < 4; ++i) {
 for (auto& t : threads) t.join();
 
 std::cout << "Total: " << counter->get() << "\n";
-
+```
 
 🧪 Tests
 To build and run tests:
@@ -59,6 +59,7 @@ cmake -S . -B build -DBUILD_TESTING=ON
 cmake --build build
 cd build && ctest
 📁 Project Structure
+```
 
 ```css
 include/
@@ -70,6 +71,7 @@ examples/
 
 tests/
 └── thread_safe_ptr_test.cpp
+```
 
 📜 License
 This project is licensed under the MIT License.
